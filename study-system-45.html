@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語自走式学習システム｜Unit 45</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Lato:wght@400;700;900&display=swap');
+  :root {
+    --blue: #1a4fa0; --orange: #e8630a; --light-blue: #e8f0fb; --light-orange: #fff3e8;
+    --green: #1a7a3c; --light-green: #e8f5ee; --gray: #555; --light-gray: #f5f5f5;
+    --border: #ddd; --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #222; font-size: 15px; line-height: 1.7; }
+  .header { background: var(--blue); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .unit-badge { background: var(--orange); color: white; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 22px; width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-title h1 { font-size: 17px; font-weight: 700; }
+  .header-title p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 4px; }
+  .progress-bar-fill { background: var(--orange); height: 4px; transition: width 0.4s ease; width: 0%; }
+  .steps-nav { background: white; border-bottom: 2px solid var(--border); overflow-x: auto; }
+  .steps-nav-inner { max-width: 860px; margin: 0 auto; display: flex; padding: 0 20px; }
+  .step-tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: #888; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; user-select: none; }
+  .step-tab:hover { color: var(--blue); }
+  .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .step-tab.done { color: var(--green); }
+  .step-tab.done::before { content: '✓ '; font-size: 11px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .step-intro { background: var(--light-blue); border-left: 4px solid var(--blue); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #333; }
+  .step-intro strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--blue); }
+  .flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; font-size: 13px; }
+  .flow-item { background: var(--blue); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+  .flow-arrow { color: var(--blue); font-weight: 700; }
+  .listen-btn { display: flex; align-items: center; gap: 10px; background: var(--orange); color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s, transform 0.1s; margin-bottom: 10px; }
+  .listen-btn:hover { background: #c7550a; transform: translateY(-1px); }
+  .done-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; }
+  .done-btn:hover { background: #145e2d; }
+  .para-number { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: white; width: 26px; height: 26px; border-radius: 50%; font-weight: 900; font-family: 'Lato', sans-serif; font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+  .para-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .para-topic { font-size: 14px; font-weight: 700; color: white; background: var(--blue); padding: 3px 10px; border-radius: 4px; }
+  .english-text { font-family: 'Lato', sans-serif; font-size: 16px; line-height: 1.9; color: #1a1a1a; background: #fafafa; border-radius: 8px; padding: 16px; border: 1px solid #e8eaed; margin-bottom: 14px; }
+  .english-text .idiom { color: var(--orange); font-weight: 700; }
+  .english-text .grammar { color: var(--blue); font-weight: 700; }
+  .japanese-text { font-size: 14px; color: #444; line-height: 1.8; padding: 12px 16px; background: #fffdf5; border-radius: 8px; border-left: 3px solid var(--orange); margin-bottom: 16px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .vocab-item { display: flex; align-items: baseline; gap: 6px; background: var(--light-blue); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
+  .vocab-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue); }
+  .vocab-sep { color: #aaa; font-size: 12px; }
+  .vocab-ja { color: #333; font-size: 13px; }
+  .idiom-list { display: flex; flex-direction: column; gap: 6px; }
+  .idiom-item { display: flex; align-items: baseline; gap: 8px; background: var(--light-orange); border-radius: 6px; padding: 8px 12px; font-size: 14px; flex-wrap: wrap; }
+  .idiom-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--orange); }
+  .idiom-ja { color: #444; font-size: 13px; }
+  .grammar-box { background: #f0f4ff; border: 1px solid #b8c8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 14px; }
+  .grammar-box .g-title { font-weight: 700; background: var(--blue); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+  .grammar-box .g-sentence { font-family: 'Lato', sans-serif; font-size: 15px; color: #1a1a1a; margin-bottom: 8px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid var(--blue); }
+  .grammar-box .g-note { font-size: 13px; color: #555; line-height: 1.7; }
+  .check-box { background: var(--light-green); border: 1px solid #a8d8b8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .check-box .check-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .check-q { font-size: 14px; color: #333; }
+  .check-a-btn { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--green); color: var(--green); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; margin-top: 4px; }
+  .check-a-btn:hover { background: var(--green); color: white; }
+  .check-answer { display: none; background: white; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 14px; color: #222; margin-top: 6px; animation: fadeIn 0.3s ease; }
+  .check-answer.visible { display: block; }
+  .check-answer .a-label { color: var(--green); font-weight: 700; margin-right: 4px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .quiz-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .quiz-q { font-size: 15px; color: #222; margin-bottom: 14px; font-weight: 500; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .quiz-opt:hover { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.selected { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.correct { border-color: var(--green); background: var(--light-green); }
+  .quiz-opt.wrong { border-color: var(--red); background: #fdecea; }
+  .quiz-opt .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .quiz-feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; animation: fadeIn 0.3s ease; }
+  .quiz-feedback.correct-fb { background: var(--light-green); color: var(--green); border-left: 3px solid var(--green); display: block; }
+  .quiz-feedback.wrong-fb { background: #fdecea; color: var(--red); border-left: 3px solid var(--red); display: block; }
+  .submit-quiz-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .submit-quiz-btn:hover { background: #143d80; }
+  .quiz-result { display: none; background: var(--light-blue); border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; animation: fadeIn 0.4s ease; }
+  .quiz-result .score { font-size: 40px; font-weight: 900; color: var(--blue); font-family: 'Lato', sans-serif; }
+  .quiz-result .score-label { font-size: 14px; color: #666; margin-bottom: 12px; }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .next-step-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; width: 100%; margin-top: 8px; }
+  .next-step-btn:hover { background: #143d80; }
+  .completion-banner { background: linear-gradient(135deg, var(--green), #2ecc71); color: white; border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+  .completion-banner h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .completion-banner p { font-size: 14px; opacity: 0.9; }
+  @media (max-width: 600px) { .vocab-grid { grid-template-columns: 1fr 1fr; } .english-text { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="unit-badge">45</div>
+    <div class="header-title">
+      <h1>Greetings from Japan</h1>
+      <p>日本式の挨拶・249 words</p>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+</div>
+
+<div class="steps-nav">
+  <div class="steps-nav-inner">
+    <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
+    <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
+    <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-section active" id="step0">
+    <div class="card">
+      <div class="card-title"><span>🔊</span> Step 1｜通しリスニング</div>
+      <div class="step-intro">
+        <strong>最初は本文を見ないで通して聞いてみましょう</strong>
+        下の流れを意識しながら聞いてみよう。
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-item">握手の起源</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">日本の挨拶の特徴</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">お辞儀の習慣</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">コロナ後の変化</div>
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（1回目）</button>
+      <audio id="audioPlayer" src="sokujukure133_eibun45.mp3" style="width:100%; margin-bottom:14px; display:block; border-radius:8px;"></audio>
+      <div class="step-intro" style="background:#fff3e8; border-left-color: var(--orange);">
+        <strong>次は本文を見ながら通して聞いてみましょう</strong>
+        内容を意識しながら聞こう。英文と日本語訳は Step 2 で確認できます。
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（2回目）</button>
+      <br>
+      <button class="done-btn" onclick="completeStep(0)">✓ リスニング完了 → 次へ</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section" id="step1">
+
+    <!-- Para 1 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">1</span>
+        <span class="para-topic">握手の起源と習慣</span>
+      </div>
+      <div class="english-text">
+        It is common for people in many parts of the world to <span class="idiom">shake hands</span> as a greeting. People often <span class="idiom">look</span> each other <span class="idiom">in the eye</span> when they grip hands. The tradition dates back to <span class="grammar">the time</span> long ago <span class="grammar">when</span> wars were common. The handshake <span class="idiom">provided</span> a way for a person to show that they were not holding any weapons.
+      </div>
+      <div class="japanese-text">
+        世界の多くの地域で、人々は挨拶をするのによく握手をする。お互いの目を見ながら手を握るのが普通だ。この伝統の起源は、しょっちゅう戦争が起きていたずいぶん前の時代にまでさかのぼる。握手は、人にとって手に何ら武器を持っていないことを示すための手立てとなっていたのである。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">grip</span><span class="vocab-sep">｜</span><span class="vocab-ja">しっかりつかむ・握り</span></div>
+        <div class="vocab-item"><span class="vocab-en">weapon</span><span class="vocab-sep">｜</span><span class="vocab-ja">武器</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">shake hands (with ~)</span><span class="idiom-ja">（〜と）握手する</span></div>
+        <div class="idiom-item"><span class="idiom-en">look ~ in the eye [face]</span><span class="idiom-ja">〜の目（顔）をまっすぐ見る；〜を直視する</span></div>
+        <div class="idiom-item"><span class="idiom-en">provide B for [to] A</span><span class="idiom-ja">AにBを供給する〔提供する〕</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法①｜the time (〜) when ...（関係副詞）</div>
+        <div class="g-sentence">the tradition dates back to <u>the time</u> long ago <u>when</u> wars were common</div>
+        <div class="g-note"><strong>the time when ...</strong> は「…する時代」という意味の関係副詞の表現。<strong>when</strong> が <strong>the time</strong> を修飾している。→ 関係副詞③</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q1</strong> 握手はなぜ始まったのか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>手に武器を持っていないことを示すための手立てとして始まった。</div>
+      </div>
+    </div>
+
+    <!-- Para 2 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">2</span>
+        <span class="para-topic">日本の挨拶の特徴</span>
+      </div>
+      <div class="english-text">
+        In Japan, you should think twice before you <span class="idiom">go in for</span> a handshake. People tend to <span class="idiom">be particular about</span> the way they greet others. Whether you are meeting someone in a formal setting, <span class="idiom">dropping in on</span> someone at their home, or seeing someone <span class="idiom">off</span> as they leave, certain forms of greetings are expected.
+      </div>
+      <div class="japanese-text">
+        日本では、握手をしようとする前によく考えた方がよい。人は、挨拶の方法にはうるさくなりがちである。改まった場で人と会う時であれ、誰かの家に立ち寄る時であれ、あるいはその場を去る人を見送る時であれ、その時々で期待される挨拶の仕方というものがある。
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">go in for ~</span><span class="idiom-ja">（趣味などとして）〜をし始める</span></div>
+        <div class="idiom-item"><span class="idiom-en">be particular about [over] ~</span><span class="idiom-ja">（好みなどに関して）〜にうるさい</span></div>
+        <div class="idiom-item"><span class="idiom-en">drop in (on 人; at 場所)</span><span class="idiom-ja">（〜に）立ち寄る</span></div>
+        <div class="idiom-item"><span class="idiom-en">see off ~</span><span class="idiom-ja">〜を見送る</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法②｜並列関係をつかもう（whether … or …）</div>
+        <div class="g-sentence">
+          Whether you are<br>
+          &nbsp;&nbsp;<u>meeting</u> someone in a formal setting,<br>
+          &nbsp;&nbsp;<u>dropping in on</u> someone at their home,<br>
+          or <u>seeing</u> someone off as they leave,<br>
+          certain forms of greetings are expected.
+        </div>
+        <div class="g-note"><strong>whether</strong> の中で <strong>meeting / dropping in on / seeing</strong> の3つの動名詞句が並列されている。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q2</strong> 日本の挨拶の特徴は何か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>場面によって期待される挨拶の形式があり、人々は挨拶の仕方にうるさい。</div>
+      </div>
+    </div>
+
+    <!-- Para 3 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">3</span>
+        <span class="para-topic">お辞儀の習慣</span>
+      </div>
+      <div class="english-text">
+        Also, the bow is the traditional form of greeting for the Japanese. A quick bow is sufficient for familiar people, while deeper bows are used for a person who <span class="idiom">is senior to</span> you. Sometimes people make multiple quick bows <span class="idiom">in succession</span>. To people unfamiliar with the custom, it may appear that the person bowing is <span class="idiom">putting on airs</span>. But it's a perfectly normal greeting <span class="idiom">all the same</span>.
+      </div>
+      <div class="japanese-text">
+        また、日本人にとってはお辞儀が伝統的な挨拶の形式である。親しい人には軽く頭を下げるだけで十分だが、自分より年上の人にはもっと深くお辞儀をする。時には、何度か連続で軽く会釈をすることもある。この習慣になじみのない人には、お辞儀をする人が気取っているように見えることもあるかもしれない。しかし、それでもまったく普通の挨拶なのだ。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">bow</span><span class="vocab-sep">｜</span><span class="vocab-ja">お辞儀・お辞儀をする</span></div>
+        <div class="vocab-item"><span class="vocab-en">sufficient</span><span class="vocab-sep">｜</span><span class="vocab-ja">十分な</span></div>
+        <div class="vocab-item"><span class="vocab-en">multiple</span><span class="vocab-sep">｜</span><span class="vocab-ja">多数の・多様な</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">be senior to ~</span><span class="idiom-ja">〜より年上である</span></div>
+        <div class="idiom-item"><span class="idiom-en">in succession</span><span class="idiom-ja">連続して；次々と</span></div>
+        <div class="idiom-item"><span class="idiom-en">put on airs</span><span class="idiom-ja">気取る</span></div>
+        <div class="idiom-item"><span class="idiom-en">all (just) the same</span><span class="idiom-ja">それでも・やはり</span></div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q3</strong> 日本のお辞儀について正しく説明しているものは何か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>親しい人には軽く、年上の人には深くお辞儀をする。外国人には気取って見えることもあるが、普通の挨拶。</div>
+      </div>
+    </div>
+
+    <!-- Para 4 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">4</span>
+        <span class="para-topic">コロナ後の挨拶の変化</span>
+      </div>
+      <div class="english-text">
+        With recent trends, we cannot <span class="idiom">rule out</span> the possibility that the rest of the world could <span class="idiom">take after</span> Japan and use bowing as a greeting. Due to the COVID-19 pandemic, people around the world have <span class="idiom">become reluctant to</span> touch one another. They have <span class="idiom">exchanged</span> the handshake custom <span class="idiom">for</span> elbow bumps or fist bumps. Such greetings were informal in the past, but today they <span class="grammar">are no less</span> polite <span class="grammar">than</span> a handshake.
+      </div>
+      <div class="japanese-text">
+        昨今の潮流を考えると、世界が日本に倣い、挨拶としてお辞儀をするようになる可能性も排除できない。新型コロナウイルス感染症の大流行により、世界中の人々がお互いに接触することをためらうようになった。人々は握手の習慣に代えて、肘タッチやグータッチをするようになっている。こうした挨拶の仕方は以前はインフォーマルなものだったが、今では握手に劣らず礼儀にかなったものである。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">pandemic</span><span class="vocab-sep">｜</span><span class="vocab-ja">新型コロナウイルス感染症の世界的流行</span></div>
+        <div class="vocab-item"><span class="vocab-en">bump</span><span class="vocab-sep">｜</span><span class="vocab-ja">ぶつけること</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">rule out ~</span><span class="idiom-ja">〜を除外する</span></div>
+        <div class="idiom-item"><span class="idiom-en">take after ~</span><span class="idiom-ja">〜を追跡する；（人が）〜に似ている</span></div>
+        <div class="idiom-item"><span class="idiom-en">be reluctant to do</span><span class="idiom-ja">…したがらない</span></div>
+        <div class="idiom-item"><span class="idiom-en">exchange A for B</span><span class="idiom-ja">AをBと交換する</span></div>
+        <div class="idiom-item"><span class="idiom-en">A is no less ~ than B is</span><span class="idiom-ja">BがそうであるのとAは同様に〜である；AはBに劣らず〜である</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法③｜A is no less ~ than B（比較）</div>
+        <div class="g-sentence">they <u>are no less</u> polite <u>than</u> a handshake</div>
+        <div class="g-note"><strong>A is no less ～ than B</strong> で「BがそうであるのとAは同様に〜である」という意味。「握手と同様に礼儀にかなっている」＝「握手に劣らず礼儀正しい」という意味。→ 比較②k</div>
+      </div>
+      <div class="grammar-box">
+        <div class="g-title">文法④｜that節を目的語にとる（rule out the possibility that …）</div>
+        <div class="g-sentence">we cannot rule out <u>the possibility that</u> the rest of the world could take after Japan</div>
+        <div class="g-note"><strong>the possibility that ...</strong> は「…という可能性」という意味の同格表現。that節が possibility の内容を説明している。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q4</strong> コロナ後、挨拶の習慣はどう変わったか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>握手の代わりに肘タッチやグータッチが使われるようになり、今では握手に劣らず礼儀正しい挨拶とされている。</div>
+      </div>
+    </div>
+
+    <div class="card" style="background: var(--light-blue);">
+      <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:10px;">【15字要約】</div>
+      <div style="font-size:20px; font-weight:900; color:#222; letter-spacing:0.05em;">挨拶は文化と時代で変わる</div>
+    </div>
+
+    <button class="next-step-btn" onclick="completeStep(1)">Step 3｜確認クイズへ →</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section" id="step2">
+    <div class="card">
+      <div class="card-title"><span>📝</span> Step 3｜確認クイズ</div>
+      <p style="font-size:14px; color:#666; margin-bottom:20px;">本文の内容を確認しましょう。各問題の選択肢を選んでから「採点する」を押してね。</p>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q1.</strong> Why did the tradition of shaking hands begin?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">A</div> To show respect to elders.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="true"><div class="opt-letter">B</div> To show that a person was not holding any weapons.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">C</div> To greet people from other countries.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">D</div> To replace the tradition of bowing.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q2.</strong> In Japan, when should you use a deeper bow?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">A</div> When greeting a close friend.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="true"><div class="opt-letter">B</div> When greeting someone who is senior to you.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">C</div> When meeting foreigners.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">D</div> When saying goodbye in a casual setting.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q3.</strong> 次のイディオムの意味として正しいものを選べ。<br><br><em>put on airs</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">A</div> 〜を除外する</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">B</div> 連続して</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="true"><div class="opt-letter">C</div> 気取る</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">D</div> それでもやはり</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q4.</strong> What has happened to greetings due to the COVID-19 pandemic?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">A</div> People have stopped greeting each other entirely.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">B</div> Bowing has become the main greeting worldwide.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="true"><div class="opt-letter">C</div> People have exchanged handshakes for elbow bumps or fist bumps.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">D</div> Handshakes have become more popular than ever.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q5.</strong> 空欄に入る最も適切な語を選べ。<br><br><em>Elbow bumps are no ______ polite than a handshake.</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">A</div> more</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="true"><div class="opt-letter">B</div> less</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">C</div> much</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">D</div> fewer</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+
+      <button class="submit-quiz-btn" onclick="submitQuiz()">採点する</button>
+
+      <div class="quiz-result" id="quizResult">
+        <div class="score" id="scoreNum">0/5</div>
+        <div class="score-label">正解数</div>
+        <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
+      </div>
+
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section" id="step3">
+    <div class="card">
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
+      <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
+        <div style="font-size:20px; font-weight:900; color:#222;">挨拶は文化と時代で変わる</div>
+      </div>
+      <div class="step-intro">
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">16</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
+      </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+    </div>
+    <div class="completion-banner" id="completionBanner" style="display:none;">
+      <h2>🎉 Unit 45 完了！</h2>
+      <p>お疲れ様でした。日本式の挨拶と世界の挨拶文化について学習しました。<br>次のユニットへ進みましょう！</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const stepDone=[false,false,false,false];
+  const quizAnswers={q1:null,q2:null,q3:null,q4:null,q5:null};
+  const correctAnswers={q1:false,q2:false,q3:false,q4:false,q5:false};
+
+  function goToStep(n){
+    document.querySelectorAll('.step-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+    document.querySelectorAll('.step-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  }
+  function completeStep(n){
+    stepDone[n]=true;
+    const tab=document.getElementById('tab'+n);
+    tab.classList.add('done');tab.classList.remove('active');
+    document.getElementById('progressBar').style.width=(stepDone.filter(Boolean).length/4*100)+'%';
+    if(n<3)goToStep(n+1);
+    else{document.getElementById('completionBanner').style.display='block';document.getElementById('completionBanner').scrollIntoView({behavior:'smooth'});}
+  }
+  function toggleAnswer(btn){
+    const a=btn.nextElementSibling;
+    const v=a.classList.toggle('visible');
+    btn.textContent=v?'▲ 閉じる':'▼ 答えを見る';
+  }
+  function playAudio(){
+    const audio=document.getElementById('audioPlayer');
+    if(audio.paused){audio.play();}else{audio.pause();audio.currentTime=0;}
+  }
+  function selectOpt(el,qid){
+    el.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');quizAnswers[qid]=el;correctAnswers[qid]=el.dataset.correct==='true';
+  }
+  function submitQuiz(){
+    const questions=['q1','q2','q3','q4','q5'];
+    let score=0;
+    const feedbacks={
+      q1:{correct:'正解！「The handshake provided a way for a person to show that they were not holding any weapons.」が根拠です。',wrong:'不正解。Para 1の最後の文を確認しよう。'},
+      q2:{correct:'正解！「deeper bows are used for a person who is senior to you」が根拠です。',wrong:'不正解。Para 3「deeper bows are used for a person who is senior to you」を見直そう。'},
+      q3:{correct:'正解！put on airs は「気取る」という意味です。',wrong:'不正解。Para 3のイディオム一覧を見直してみよう。'},
+      q4:{correct:'正解！「They have exchanged the handshake custom for elbow bumps or fist bumps.」が根拠です。',wrong:'不正解。Para 4「exchanged the handshake custom for elbow bumps or fist bumps」を確認しよう。'},
+      q5:{correct:'正解！A is no less ～ than B で「AはBに劣らず〜である」という意味です。',wrong:'不正解。Para 4の文法③「A is no less ～ than B」を確認しよう。'},
+    };
+    questions.forEach(q=>{
+      const fb=document.getElementById('fb-'+q);
+      const selected=quizAnswers[q];
+      if(!selected){fb.className='quiz-feedback wrong-fb';fb.textContent='未選択。必ず選んでから採点してね。';return;}
+      const isCorrect=correctAnswers[q];
+      if(isCorrect)score++;
+      selected.classList.remove('selected');
+      selected.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect)selected.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>{if(o.dataset.correct==='true')o.classList.add('correct');});
+      fb.className='quiz-feedback '+(isCorrect?'correct-fb':'wrong-fb');
+      fb.textContent=(isCorrect?'✓ ':'✗ ')+feedbacks[q][isCorrect?'correct':'wrong'];
+    });
+    const result=document.getElementById('quizResult');
+    result.style.display='block';
+    document.getElementById('scoreNum').textContent=score+'/5';
+    const msgs=['💪 もう一度本文を読み直してチャレンジしてみよう！','💪 もう一度本文を読み直してチャレンジしてみよう！','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','👏 よくできました！あと一息！','🎉 満点！素晴らしい理解力です！'];
+    document.getElementById('scoreMsg').textContent=msgs[score];
+    document.getElementById('toStep4Btn').style.display='flex';
+    result.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'shake hands (with ~)',ja:'（〜と）握手する'},
+    {en:'look ~ in the eye [face]',ja:'〜の目（顔）をまっすぐ見る；〜を直視する'},
+    {en:'provide B for [to] A',ja:'AにBを供給する〔提供する〕'},
+    {en:'the time (〜) when ...',ja:'…する時'},
+    {en:'go in for ~',ja:'（趣味などとして）〜をし始める'},
+    {en:'be particular about [over] ~',ja:'（好みなどに関して）〜にうるさい'},
+    {en:'drop in (on 人; at 場所)',ja:'（〜に）立ち寄る'},
+    {en:'see off ~',ja:'〜を見送る'},
+    {en:'be senior to ~',ja:'〜より年上である'},
+    {en:'in succession',ja:'連続して；次々と'},
+    {en:'put on airs',ja:'気取る'},
+    {en:'all (just) the same',ja:'それでも・やはり'},
+    {en:'rule out ~',ja:'〜を除外する'},
+    {en:'take after ~',ja:'〜を追跡する；（人が）〜に似ている'},
+    {en:'be reluctant to do',ja:'…したがらない'},
+    {en:'exchange A for B',ja:'AをBと交換する'},
+    {en:'A is no less ~ than B',ja:'AはBに劣らず〜である'},
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
+</script>
+
+</body>
+</html>
